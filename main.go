@@ -28,7 +28,11 @@ type Game struct {
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
 	// Write your game's logical update
-	return g.player.update()
+	g.player.update()
+	for _, bullet := range magazine {
+		bullet.update()
+	}
+	return nil
 }
 
 // Draw draws the game screen.
@@ -37,6 +41,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Write your game's rendering.
 	screen.Fill(color.White)
 	g.player.draw(screen)
+	for _, bullet := range magazine {
+		bullet.draw(screen)
+	}
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
@@ -49,9 +56,10 @@ func main() {
 	game := &Game{
 		player: NewPlayer(),
 	}
+	initMagazine(4)
 	// Specify the window size as you like. Here, a doubled size is specified.
 	ebiten.SetWindowSize(screenwidth, screenheight)
-	ebiten.SetWindowTitle("Your game's title")
+	ebiten.SetWindowTitle("THRUSTO")
 	// Call ebiten.RunGame to start your game loop.
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)

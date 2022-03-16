@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -18,6 +20,7 @@ type Player struct {
 	vy            float64
 	dead          bool
 	shipImage     *ebiten.Image
+	lastShot      time.Time
 
 	fuel int64
 }
@@ -36,17 +39,18 @@ func NewPlayer() *Player {
 		height: float64(im.Bounds().Dy()),
 		width:  float64(im.Bounds().Dx()),
 
+		rotation:  -math.Pi / 2,
 		shipImage: im,
 	}
 }
 
 func shipImage(unit float32) *ebiten.Image {
 	var path vector.Path
-	xf, yf := float32(unit), float32(unit*2)
+	xf, yf := float32(unit), float32(unit)
 	path.MoveTo(xf, yf)
-	path.LineTo(xf-unit, yf+unit)
-	path.LineTo(xf, yf-2*unit)
-	path.LineTo(xf+unit, yf+unit)
+	path.LineTo(xf+unit, yf-unit)
+	path.LineTo(xf, yf+2*unit)
+	path.LineTo(xf-unit, yf-unit)
 	path.LineTo(xf, yf)
 
 	op := &ebiten.DrawTrianglesOptions{
@@ -79,8 +83,8 @@ func (p *Player) update() error {
 		p.rotation += 0.1
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		p.vy += math.Sin(p.rotation-math.Pi/2) * thrust
-		p.vx += math.Cos(p.rotation-math.Pi/2) * thrust
+		p.vy += math.Sin(p.rotation) * thrust
+		p.vx += math.Cos(p.rotation) * thrust
 	}
 	p.vy += gravity
 	p.vx *= (1 - friction)
@@ -90,6 +94,13 @@ func (p *Player) update() error {
 
 	p.x = tmath.Clampf(p.x, 0, float64(screenwidth))
 	p.y = tmath.Clampf(p.y, 0, float64(screenheight))
+
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		if time.Since(p.lastShot) > time.Millisecond*200 {
+			p.shoot(p.x, p.y, p.rotation)
+			p.lastShot = time.Now()
+		}
+	}
 
 	return nil
 
@@ -101,8 +112,22 @@ func (p *Player) draw(screen *ebiten.Image) {
 	//move the origin to center of the image
 	op.GeoM.Translate(-float64(p.shipImage.Bounds().Dx())/2, -float64(p.shipImage.Bounds().Dy())/2)
 	//apply rotation
-	op.GeoM.Rotate(p.rotation)
+	op.GeoM.Rotate(p.rotation - math.Pi/2)
 	//place ship
 	op.GeoM.Translate(p.x, p.y)
 	screen.DrawImage(p.shipImage, op)
+}
+
+const bulletSpeed = 10
+
+func (p *Player) shoot(x, y, angle float64) {
+	log.Println("shooting")
+	if b, ok := bulletFromMagazine(); ok {
+		b.x = x
+		b.y = y
+		b.rotation = angle
+		b.active = true
+	} else {
+		log.Println("no bullets")
+	}
 }
