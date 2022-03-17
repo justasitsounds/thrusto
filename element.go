@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -26,9 +25,7 @@ type element struct {
 }
 
 func (elem *element) draw(screen *ebiten.Image) error {
-	log.Println("drawing element")
 	for _, comp := range elem.components {
-
 		if err := comp.ondraw(screen); err != nil {
 			return err
 		}

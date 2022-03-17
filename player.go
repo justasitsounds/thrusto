@@ -1,14 +1,11 @@
 package main
 
 import (
-	"log"
 	"math"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
-
-	tmath "github.com/justasitsounds/thrusto/math"
 )
 
 //Player struct for the player
@@ -25,34 +22,34 @@ type Player struct {
 	fuel int64
 }
 
-//NewPlayer creates a new player
-func NewPlayer() *Player {
+func newPlayer() *element {
 	const unit = 8
-
-	im := shipImage(unit)
-
-	return &Player{
-		x:      float64(screenwidth) / 2,
-		y:      float64(screenheight) / 2,
-		vx:     0,
-		vy:     0,
-		height: float64(im.Bounds().Dy()),
-		width:  float64(im.Bounds().Dx()),
-
-		rotation:  -math.Pi / 2, //point up
-		shipImage: im,
+	np := &element{
+		active:   true,
+		position: vec{100, 100},
+		rotation: -math.Pi / 2,
 	}
+	sd := newScreenDrawer(np, func() *ebiten.Image { return shipImage(unit) })
+	np.addComponent(sd)
+	np.addComponent(newKeyboardMover(np))
+	np.addComponent(newKeyboardShooter(np, time.Millisecond*250))
+	return np
 }
 
+/*
+//deltoid ship
+1--+--+--+
++--4--+--2
+3--+--+--+
+*/
 func shipImage(unit float32) *ebiten.Image {
 	var path vector.Path
 	xf, yf := float32(unit), float32(unit)
-	path.MoveTo(xf, yf+unit)
-	path.LineTo(xf+unit, yf+2*unit)
-	path.LineTo(xf, yf-unit)
-	path.LineTo(xf-unit, yf+2*unit)
-	path.LineTo(xf, yf+unit)
-
+	path.MoveTo(0, 0)
+	path.LineTo(xf*3, yf)
+	path.LineTo(0, yf*2)
+	path.LineTo(xf, yf)
+	path.LineTo(0, 0)
 	op := &ebiten.DrawTrianglesOptions{
 		FillRule: ebiten.EvenOdd,
 	}
@@ -65,7 +62,7 @@ func shipImage(unit float32) *ebiten.Image {
 		vs[i].ColorG = 0x11 / float32(0xff)
 		vs[i].ColorB = 0x20 / float32(0xff)
 	}
-	im := ebiten.NewImage(int(unit)*2, int(unit)*3)
+	im := ebiten.NewImage(int(unit)*3, int(unit)*2)
 	im.DrawTriangles(vs, is, emptySubImage, op)
 	return im
 }
@@ -74,60 +71,4 @@ const gravity = 0.05
 const thrust = 0.1
 const friction = 0.01
 
-func (p *Player) update() error {
-
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		p.rotation -= 0.1
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		p.rotation += 0.1
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		p.vy += math.Sin(p.rotation) * thrust
-		p.vx += math.Cos(p.rotation) * thrust
-	}
-	p.vy += gravity
-	p.vx *= (1 - friction)
-	p.vy *= (1 - friction)
-	p.x += p.vx
-	p.y += p.vy
-
-	p.x = tmath.Clampf(p.x, 0, float64(screenwidth))
-	p.y = tmath.Clampf(p.y, 0, float64(screenheight))
-
-	if ebiten.IsKeyPressed(ebiten.KeySpace) {
-		if time.Since(p.lastShot) > time.Millisecond*200 {
-			p.shoot(p.x, p.y, p.rotation)
-			p.lastShot = time.Now()
-		}
-	}
-
-	return nil
-
-}
-
-func (p *Player) draw(screen *ebiten.Image) {
-	// Draw a ship.
-	op := &ebiten.DrawImageOptions{}
-	//move the origin to center of the image
-	op.GeoM.Translate(-float64(p.shipImage.Bounds().Dx())/2, -float64(p.shipImage.Bounds().Dy())/2)
-	//apply rotation
-	op.GeoM.Rotate(p.rotation)
-	//place ship
-	op.GeoM.Translate(p.x, p.y)
-	screen.DrawImage(p.shipImage, op)
-}
-
 const bulletSpeed = 10
-
-func (p *Player) shoot(x, y, angle float64) {
-	log.Println("shooting")
-	if b, ok := bulletFromMagazine(); ok {
-		b.x = x
-		b.y = y
-		b.rotation = angle
-		b.active = true
-	} else {
-		log.Println("no bullets")
-	}
-}

@@ -23,14 +23,12 @@ func init() {
 
 // Game implements ebiten.Game interface.
 type Game struct {
-	player *Player
 }
 
 // Update proceeds the game state.
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
 	// Write your game's logical update
-	g.player.update()
 	for _, bullet := range magazine {
 		bullet.update()
 	}
@@ -45,7 +43,6 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	// Write your game's rendering.
 	screen.Fill(color.White)
-	g.player.draw(screen)
 	for _, bullet := range magazine {
 		bullet.draw(screen)
 	}
@@ -63,16 +60,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
-	game := &Game{
-		player: NewPlayer(),
-	}
-	np := &element{
-		active:   true,
-		position: vec{100, 100},
-	}
-	sd := newScreenDrawer(np, func() *ebiten.Image { return shipImage(8) })
-	np.addComponent(sd)
-	np.addComponent(newKeyboardMover(np))
+	game := &Game{}
+	//point up
+	np := newPlayer()
 	elements = append(elements, np)
 	initMagazine(4)
 	// Specify the window size as you like. Here, a doubled size is specified.

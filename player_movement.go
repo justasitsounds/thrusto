@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	tmath "github.com/justasitsounds/thrusto/math"
@@ -46,4 +47,41 @@ func (km *keyboardMover) onupdate() error {
 	km.container.position.y = tmath.Clampf(km.container.position.y, 0, float64(screenheight))
 
 	return nil
+}
+
+type keyboardShooter struct {
+	container *element
+	cooldown  time.Duration
+	lastShot  time.Time
+}
+
+func (ks *keyboardShooter) ondraw(screen *ebiten.Image) error {
+	return nil
+}
+
+func (ks *keyboardShooter) onupdate() error {
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		if time.Since(ks.lastShot) > ks.cooldown {
+			ks.shoot(ks.container.position.x, ks.container.position.y, ks.container.rotation)
+			ks.lastShot = time.Now()
+		}
+	}
+	return nil
+}
+
+func (ks *keyboardShooter) shoot(x, y, rotation float64) {
+	if b, ok := bulletFromMagazine(); ok {
+		b.x = x
+		b.y = y
+		b.rotation = rotation
+		b.active = true
+	}
+}
+
+func newKeyboardShooter(container *element, cooldown time.Duration) *keyboardShooter {
+	return &keyboardShooter{
+		container: container,
+		cooldown:  cooldown,
+		lastShot:  time.Now(),
+	}
 }
