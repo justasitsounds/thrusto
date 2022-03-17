@@ -7,23 +7,17 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type bullet struct {
-	x, y     float64
-	rotation float64
-	active   bool
-	image    *ebiten.Image
-}
+var magazine []*element
 
-var magazine []*bullet
-
-func initMagazine(bulletCount int) {
+func initMagazine(bulletCount int) []*element {
 	for i := 0; i < bulletCount; i++ {
 		bul := newBullet()
 		magazine = append(magazine, bul)
 	}
+	return magazine
 }
 
-func bulletFromMagazine() (*bullet, bool) {
+func bulletFromMagazine() (*element, bool) {
 	for _, b := range magazine {
 		if !b.active {
 			return b, true
@@ -38,29 +32,37 @@ func bulletImage() *ebiten.Image {
 	return im
 }
 
-func newBullet() *bullet {
-	return &bullet{
-		image:  bulletImage(),
-		active: false,
-	}
+func newBullet() *element {
+	el := &element{}
+	el.addComponent(newScreenDrawer(el, bulletImage))
+	el.addComponent(newBulletMover(el))
+
+	return el
 }
 
-func (b *bullet) update() {
-	var vx, vy float64
-	vx = math.Cos(b.rotation) * bulletSpeed
-	vy = math.Sin(b.rotation) * bulletSpeed
-	b.x += vx
-	b.y += vy
-	if b.x < 0 || b.x > float64(screenwidth) || b.y < 0 || b.y > float64(screenheight) {
-		b.active = false
-	}
+type bulletMover struct {
+	container *element
+	velocity  vec
 }
 
-func (b *bullet) draw(screen *ebiten.Image) {
-	if !b.active {
-		return
+func newBulletMover(container *element) *bulletMover {
+	return &bulletMover{
+		container: container,
+		velocity:  vec{0, 0},
 	}
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(b.x, b.y)
-	screen.DrawImage(b.image, op)
+}
+func (bm *bulletMover) onupdate() error {
+	// var vx, vy float64
+	bm.velocity.x = math.Cos(bm.container.rotation) * bulletSpeed
+	bm.velocity.y = math.Sin(bm.container.rotation) * bulletSpeed
+	bm.container.position.x += bm.velocity.x
+	bm.container.position.y += bm.velocity.y
+	if bm.container.position.x < 0 || bm.container.position.x > float64(screenwidth) || bm.container.position.y < 0 || bm.container.position.y > float64(screenheight) {
+		bm.container.active = false
+	}
+	return nil
+}
+
+func (bm *bulletMover) ondraw(screen *ebiten.Image) error {
+	return nil
 }

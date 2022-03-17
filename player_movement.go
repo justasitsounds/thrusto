@@ -71,8 +71,8 @@ func (ks *keyboardShooter) onupdate() error {
 
 func (ks *keyboardShooter) shoot(x, y, rotation float64) {
 	if b, ok := bulletFromMagazine(); ok {
-		b.x = x
-		b.y = y
+		b.position.x = x
+		b.position.y = y
 		b.rotation = rotation
 		b.active = true
 	}
