@@ -15,6 +15,8 @@ var (
 	screenwidth   = 640
 )
 
+var elements []*element
+
 func init() {
 	emptyImage.Fill(color.White)
 }
@@ -32,6 +34,9 @@ func (g *Game) Update() error {
 	for _, bullet := range magazine {
 		bullet.update()
 	}
+	for _, e := range elements {
+		e.update()
+	}
 	return nil
 }
 
@@ -43,6 +48,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.player.draw(screen)
 	for _, bullet := range magazine {
 		bullet.draw(screen)
+	}
+	for _, e := range elements {
+		if e.active {
+			e.draw(screen)
+		}
 	}
 }
 
@@ -56,6 +66,14 @@ func main() {
 	game := &Game{
 		player: NewPlayer(),
 	}
+	np := &element{
+		active:   true,
+		position: vec{100, 100},
+	}
+	sd := newScreenDrawer(np, func() *ebiten.Image { return shipImage(8) })
+	np.addComponent(sd)
+	np.addComponent(newKeyboardMover(np))
+	elements = append(elements, np)
 	initMagazine(4)
 	// Specify the window size as you like. Here, a doubled size is specified.
 	ebiten.SetWindowSize(screenwidth, screenheight)

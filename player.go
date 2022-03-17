@@ -39,7 +39,7 @@ func NewPlayer() *Player {
 		height: float64(im.Bounds().Dy()),
 		width:  float64(im.Bounds().Dx()),
 
-		rotation:  -math.Pi / 2,
+		rotation:  -math.Pi / 2, //point up
 		shipImage: im,
 	}
 }
@@ -47,11 +47,11 @@ func NewPlayer() *Player {
 func shipImage(unit float32) *ebiten.Image {
 	var path vector.Path
 	xf, yf := float32(unit), float32(unit)
-	path.MoveTo(xf, yf)
-	path.LineTo(xf+unit, yf-unit)
-	path.LineTo(xf, yf+2*unit)
-	path.LineTo(xf-unit, yf-unit)
-	path.LineTo(xf, yf)
+	path.MoveTo(xf, yf+unit)
+	path.LineTo(xf+unit, yf+2*unit)
+	path.LineTo(xf, yf-unit)
+	path.LineTo(xf-unit, yf+2*unit)
+	path.LineTo(xf, yf+unit)
 
 	op := &ebiten.DrawTrianglesOptions{
 		FillRule: ebiten.EvenOdd,
@@ -112,7 +112,7 @@ func (p *Player) draw(screen *ebiten.Image) {
 	//move the origin to center of the image
 	op.GeoM.Translate(-float64(p.shipImage.Bounds().Dx())/2, -float64(p.shipImage.Bounds().Dy())/2)
 	//apply rotation
-	op.GeoM.Rotate(p.rotation - math.Pi/2)
+	op.GeoM.Rotate(p.rotation)
 	//place ship
 	op.GeoM.Translate(p.x, p.y)
 	screen.DrawImage(p.shipImage, op)
