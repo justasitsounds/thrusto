@@ -8,6 +8,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const gravity = 0.05
+
 var (
 	emptyImage    = ebiten.NewImage(3, 3)
 	emptySubImage = emptyImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image)
@@ -29,9 +31,6 @@ type Game struct {
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
 	// Write your game's logical update
-	// for _, bullet := range magazine {
-	// 	bullet.update()
-	// }
 	for _, e := range elements {
 		e.update()
 	}
@@ -43,9 +42,6 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	// Write your game's rendering.
 	screen.Fill(color.White)
-	// for _, bullet := range magazine {
-	// 	bullet.draw(screen)
-	// }
 	for _, e := range elements {
 		if e.active {
 			e.draw(screen)
@@ -65,6 +61,7 @@ func main() {
 	np := newPlayer()
 	elements = append(elements, np)
 	elements = append(elements, initMagazine(4)...)
+	elements = append(elements, newFuelBar())
 	// Specify the window size as you like. Here, a doubled size is specified.
 	ebiten.SetWindowSize(screenwidth, screenheight)
 	ebiten.SetWindowTitle("THRUSTO")

@@ -33,7 +33,9 @@ func bulletImage() *ebiten.Image {
 }
 
 func newBullet() *element {
-	el := &element{}
+	el := &element{
+		label: "bullet",
+	}
 	el.addComponent(newScreenDrawer(el, bulletImage))
 	el.addComponent(newBulletMover(el))
 
@@ -52,7 +54,6 @@ func newBulletMover(container *element) *bulletMover {
 	}
 }
 func (bm *bulletMover) onupdate() error {
-	// var vx, vy float64
 	bm.velocity.x = math.Cos(bm.container.rotation) * bulletSpeed
 	bm.velocity.y = math.Sin(bm.container.rotation) * bulletSpeed
 	bm.container.position.x += bm.velocity.x

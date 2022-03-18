@@ -21,6 +21,7 @@ type element struct {
 	velocity   vec
 	rotation   float64
 	active     bool
+	label      string
 	components []component
 }
 
@@ -31,6 +32,10 @@ func (elem *element) draw(screen *ebiten.Image) error {
 		}
 	}
 	return nil
+}
+
+func (elem *element) String() string {
+	return fmt.Sprintf("label:%s, position:%v", elem.label, elem.position)
 }
 
 func (elem *element) update() error {

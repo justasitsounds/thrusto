@@ -10,13 +10,11 @@ import (
 
 type keyboardMover struct {
 	container *element
-	drawer    *screenDrawer
 }
 
 func newKeyboardMover(container *element) *keyboardMover {
 	return &keyboardMover{
 		container: container,
-		drawer:    container.getComponent(&screenDrawer{}).(*screenDrawer),
 	}
 }
 
@@ -32,8 +30,9 @@ func (km *keyboardMover) onupdate() error {
 		km.container.rotation += 0.1
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		km.container.velocity.y += math.Sin(km.container.rotation) * thrust
-		km.container.velocity.x += math.Cos(km.container.rotation) * thrust
+		availableimpulse := burnFuel(thrust)
+		km.container.velocity.y += math.Sin(km.container.rotation) * availableimpulse
+		km.container.velocity.x += math.Cos(km.container.rotation) * availableimpulse
 	}
 	km.container.velocity.y += gravity
 
@@ -43,6 +42,7 @@ func (km *keyboardMover) onupdate() error {
 	km.container.position.x += km.container.velocity.x
 	km.container.position.y += km.container.velocity.y
 
+	//keep ship on screen - would be useful for scrolling bounds?
 	km.container.position.x = tmath.Clampf(km.container.position.x, 0, float64(screenwidth))
 	km.container.position.y = tmath.Clampf(km.container.position.y, 0, float64(screenheight))
 

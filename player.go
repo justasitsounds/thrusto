@@ -8,19 +8,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-//Player struct for the player
-type Player struct {
-	x, y          float64
-	height, width float64
-	rotation      float64
-	vx            float64
-	vy            float64
-	dead          bool
-	shipImage     *ebiten.Image
-	lastShot      time.Time
-
-	fuel int64
-}
+const thrust = 0.1
+const friction = 0.01
 
 func newPlayer() *element {
 	const unit = 8
@@ -28,6 +17,7 @@ func newPlayer() *element {
 		active:   true,
 		position: vec{100, 100},
 		rotation: -math.Pi / 2,
+		label:    "player",
 	}
 	sd := newScreenDrawer(np, func() *ebiten.Image { return shipImage(unit) })
 	np.addComponent(sd)
@@ -66,9 +56,5 @@ func shipImage(unit float32) *ebiten.Image {
 	im.DrawTriangles(vs, is, emptySubImage, op)
 	return im
 }
-
-const gravity = 0.05
-const thrust = 0.1
-const friction = 0.01
 
 const bulletSpeed = 10
