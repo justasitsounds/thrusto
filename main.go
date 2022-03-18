@@ -1,25 +1,49 @@
 package main
 
 import (
+	"embed"
 	"image"
 	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 const gravity = 0.05
 
 var (
+	//go:embed assets/fonts
+	fonts embed.FS
+
+	gravityRegular font.Face
+
+	elements      []*element
 	emptyImage    = ebiten.NewImage(3, 3)
 	emptySubImage = emptyImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image)
 	screenheight  = 480
 	screenwidth   = 640
 )
 
-var elements []*element
-
 func init() {
+	fontBytes, err := fonts.ReadFile("assets/fonts/GravityRegular5.ttf")
+	if err != nil {
+		log.Fatal("can't open embedded font")
+	}
+	tt, err := opentype.Parse(fontBytes)
+	if err != nil {
+		log.Fatal("couldn't parse font")
+	}
+	gravityRegular, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    11,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		log.Fatal("couldn't create face")
+	}
+
 	emptyImage.Fill(color.White)
 }
 

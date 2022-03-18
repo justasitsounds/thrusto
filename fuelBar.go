@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
-var fuellevel float64 = 10
+var fuellevel float64 = 100
 
 func newFuelBar() *element {
 	el := &element{
@@ -58,5 +60,8 @@ func (fm *fuelBarMover) onupdate() error {
 }
 
 func (fm *fuelBarMover) ondraw(screen *ebiten.Image) error {
+	fuelStatus := fmt.Sprintf("Fuel:%.1f", fuellevel)
+	var x, y = fm.container.position.x, fm.container.position.y
+	text.Draw(screen, fuelStatus, gravityRegular, int(x), int(y)+20, color.Black)
 	return nil
 }
