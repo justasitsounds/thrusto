@@ -22,8 +22,9 @@ var (
 	elements      []*element
 	emptyImage    = ebiten.NewImage(3, 3)
 	emptySubImage = emptyImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image)
-	screenheight  = 480
-	screenwidth   = 640
+	screenheight  = 240
+	screenwidth   = 320
+	screenScale   = 2
 )
 
 func init() {
@@ -36,7 +37,7 @@ func init() {
 		log.Fatal("couldn't parse font")
 	}
 	gravityRegular, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    11,
+		Size:    8,
 		DPI:     72,
 		Hinting: font.HintingFull,
 	})
@@ -87,7 +88,7 @@ func main() {
 	elements = append(elements, initMagazine(4)...)
 	elements = append(elements, newFuelBar())
 	// Specify the window size as you like. Here, a doubled size is specified.
-	ebiten.SetWindowSize(screenwidth, screenheight)
+	ebiten.SetWindowSize(screenwidth*screenScale, screenheight*screenScale)
 	ebiten.SetWindowTitle("THRUSTO")
 	// Call ebiten.RunGame to start your game loop.
 	if err := ebiten.RunGame(game); err != nil {

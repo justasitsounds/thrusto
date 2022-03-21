@@ -2,9 +2,64 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+type animator struct {
+	container        *element
+	sequences        map[string]*sequence
+	currentSequence  string
+	lastFrameChanged time.Time
+	finished         bool
+	transformation   *ebiten.GeoM
+	width, height    float64
+	origin           vec
+}
+
+func newAnimator(container *element, sequences map[string]*sequence, defaultSequence string) *animator {
+	return &animator{
+		container:        container,
+		sequences:        sequences,
+		currentSequence:  defaultSequence,
+		lastFrameChanged: time.Now(),
+	}
+}
+
+func (an *animator) onupdate() error {
+	sequence := an.sequences[an.currentSequence]
+
+	frameInterval := float64(time.Second) / sequence.sampleRate
+
+	if time.Since(an.lastFrameChanged) >= time.Duration(frameInterval) {
+		an.finished = sequence.nextFrame()
+		an.lastFrameChanged = time.Now()
+	}
+	return nil
+}
+
+func (an *animator) ondraw(screen *ebiten.Image) error {
+	img := an.sequences[an.currentSequence].image()
+	width := img.Bounds().Max.X - img.Bounds().Min.X
+	height := img.Bounds().Max.Y - img.Bounds().Min.Y
+	origin := vec{-float64(width) / 2, -float64(height) / 2} //default origin center of image
+	op := &ebiten.DrawImageOptions{}
+	//move the origin
+	op.GeoM.Translate(origin.x, origin.y)
+	//apply rotation
+	op.GeoM.Rotate(an.container.rotation)
+	//move to container x,y
+	op.GeoM.Translate(an.container.position.x, an.container.position.y)
+
+	if an.transformation != nil {
+		an.transformation.Concat(op.GeoM)
+		screen.DrawImage(img, &ebiten.DrawImageOptions{GeoM: *an.transformation})
+	} else {
+		screen.DrawImage(img, op)
+	}
+	return nil
+}
 
 type screenDrawer struct {
 	container *element
@@ -13,6 +68,30 @@ type screenDrawer struct {
 	width, height  float64
 	origin         vec
 	transformation *ebiten.GeoM
+}
+
+type sequence struct {
+	images     []*ebiten.Image
+	frame      int
+	sampleRate float64
+	loop       bool
+}
+
+func (s *sequence) image() *ebiten.Image {
+	return s.images[s.frame]
+}
+
+func (s *sequence) nextFrame() bool {
+	if s.frame == len(s.images)-1 {
+		if s.loop {
+			s.frame = 0
+		} else {
+			return true
+		}
+	} else {
+		s.frame++
+	}
+	return false
 }
 
 func newScreenDrawer(container *element, imgfunc func() *ebiten.Image) *screenDrawer {

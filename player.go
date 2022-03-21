@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -19,8 +20,25 @@ func newPlayer() *element {
 		rotation: -math.Pi / 2,
 		label:    "player",
 	}
-	sd := newScreenDrawer(np, func() *ebiten.Image { return shipImage(unit) })
-	np.addComponent(sd)
+	seq := &sequence{
+		images: []*ebiten.Image{
+			shipWithFlame(unit, 1),
+			shipWithFlame(unit, 3),
+			shipWithFlame(unit, 5),
+			shipWithFlame(unit, 2),
+		},
+		loop:       true,
+		sampleRate: 30,
+	}
+	sequences := map[string]*sequence{
+		"idle": {
+			images: []*ebiten.Image{shipImage(unit)},
+			loop:   false,
+		},
+		"burn": seq,
+	}
+	an := newAnimator(np, sequences, "burn")
+	np.addComponent(an)
 	np.addComponent(newKeyboardMover(np))
 	np.addComponent(newKeyboardShooter(np, time.Millisecond*250))
 	return np
@@ -57,4 +75,39 @@ func shipImage(unit float32) *ebiten.Image {
 	return im
 }
 
-const bulletSpeed = 10
+/*
++--+--2--+--+
++--+--+--+--+
+1--+--+--+--3
++--+--+--+--+
++--+--4--+--+
+*/
+func shipWithFlame(unit float32, seed int64) *ebiten.Image {
+	var path vector.Path
+	xf, yf := float32(unit/2), float32(unit/2)
+
+	rand.Seed(seed * 52413)
+	initx := rand.Intn(int(unit))
+
+	path.MoveTo(float32(initx), yf*2)
+	path.LineTo(xf, yf)
+	path.LineTo(xf*2, yf*2)
+	path.LineTo(xf, yf*3)
+	path.LineTo(float32(initx), yf*2)
+	op := &ebiten.DrawTrianglesOptions{
+		FillRule: ebiten.EvenOdd,
+	}
+
+	vs, is := path.AppendVerticesAndIndicesForFilling(nil, nil)
+	for i := range vs {
+		vs[i].SrcX = 1
+		vs[i].SrcY = 1
+		vs[i].ColorR = 0xff / float32(0xff)
+		vs[i].ColorG = 0x99 / float32(0xff)
+		vs[i].ColorB = 0x33 / float32(0xff)
+	}
+
+	im := shipImage(unit)
+	im.DrawTriangles(vs, is, emptySubImage, op)
+	return im
+}

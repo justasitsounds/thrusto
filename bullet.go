@@ -9,6 +9,8 @@ import (
 
 var magazine []*element
 
+const bulletSpeed = 10
+
 func initMagazine(bulletCount int) []*element {
 	for i := 0; i < bulletCount; i++ {
 		bul := newBullet()

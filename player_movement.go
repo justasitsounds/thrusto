@@ -10,12 +10,16 @@ import (
 
 type keyboardMover struct {
 	container *element
+	animator  *animator
 }
 
 func newKeyboardMover(container *element) *keyboardMover {
-	return &keyboardMover{
+	km := &keyboardMover{
 		container: container,
+		animator:  container.getComponent(&animator{}).(*animator),
 	}
+
+	return km
 }
 
 func (km *keyboardMover) ondraw(screen *ebiten.Image) error {
@@ -31,8 +35,15 @@ func (km *keyboardMover) onupdate() error {
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
 		availableimpulse := burnFuel(thrust)
+		if km.animator != nil {
+			km.animator.currentSequence = "burn"
+		}
 		km.container.velocity.y += math.Sin(km.container.rotation) * availableimpulse
 		km.container.velocity.x += math.Cos(km.container.rotation) * availableimpulse
+	} else {
+		if km.animator != nil {
+			km.animator.currentSequence = "idle"
+		}
 	}
 	km.container.velocity.y += gravity
 
