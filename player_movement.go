@@ -35,15 +35,15 @@ func (km *keyboardMover) onupdate() error {
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
 		availableimpulse := burnFuel(thrust)
-		if km.animator != nil {
-			km.animator.currentSequence = "burn"
+		if availableimpulse > 0 {
+			km.container.raiseEvent("burn")
+			km.container.velocity.y += math.Sin(km.container.rotation) * availableimpulse
+			km.container.velocity.x += math.Cos(km.container.rotation) * availableimpulse
+		} else {
+			km.container.raiseEvent("idle")
 		}
-		km.container.velocity.y += math.Sin(km.container.rotation) * availableimpulse
-		km.container.velocity.x += math.Cos(km.container.rotation) * availableimpulse
 	} else {
-		if km.animator != nil {
-			km.animator.currentSequence = "idle"
-		}
+		km.container.raiseEvent("idle")
 	}
 	km.container.velocity.y += gravity
 

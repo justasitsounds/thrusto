@@ -17,12 +17,13 @@ type vec struct {
 }
 
 type element struct {
-	position   vec
-	velocity   vec
-	rotation   float64
-	active     bool
-	label      string
-	components []component
+	position      vec
+	velocity      vec
+	rotation      float64
+	active        bool
+	label         string
+	components    []component
+	eventHandlers map[string][]func()
 }
 
 func (elem *element) draw(screen *ebiten.Image) error {
@@ -32,6 +33,21 @@ func (elem *element) draw(screen *ebiten.Image) error {
 		}
 	}
 	return nil
+}
+
+func (elem *element) raiseEvent(event string) {
+	for _, handler := range elem.eventHandlers[event] {
+		handler()
+	}
+}
+
+func (elem *element) register(event string, handlers []func()) {
+	if elem.eventHandlers == nil {
+		elem.eventHandlers = make(map[string][]func())
+	}
+	for _, handler := range handlers {
+		elem.eventHandlers[event] = append(elem.eventHandlers[event], handler)
+	}
 }
 
 func (elem *element) String() string {

@@ -37,8 +37,11 @@ func newPlayer() *element {
 		},
 		"burn": seq,
 	}
-	an := newAnimator(np, sequences, "burn")
+	an := newAnimator(np, sequences, "idle")
 	np.addComponent(an)
+	thrustSound := newSound("assets/audio/thrust_loop.ogg", true)
+	np.register("burn", []func(){thrustSound.play, func() { an.currentSequence = "burn" }})
+	np.register("idle", []func(){thrustSound.stop, func() { an.currentSequence = "idle" }})
 	np.addComponent(newKeyboardMover(np))
 	np.addComponent(newKeyboardShooter(np, time.Millisecond*250))
 	return np
@@ -102,9 +105,9 @@ func shipWithFlame(unit float32, seed int64) *ebiten.Image {
 	for i := range vs {
 		vs[i].SrcX = 1
 		vs[i].SrcY = 1
-		vs[i].ColorR = 0xff / float32(0xff)
-		vs[i].ColorG = 0x99 / float32(0xff)
-		vs[i].ColorB = 0x33 / float32(0xff)
+		vs[i].ColorR = 1
+		vs[i].ColorG = 0.8 - (rand.Float32() * 4 / 10) //0.6 +-0.2
+		vs[i].ColorB = 0.3 - (rand.Float32() * 2 / 10) //0.2+-0.1
 	}
 
 	im := shipImage(unit)

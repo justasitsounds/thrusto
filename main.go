@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -16,10 +17,13 @@ const gravity = 0.05
 var (
 	//go:embed assets/fonts
 	fonts embed.FS
+	//go:embed assets/audio
+	audioFS embed.FS
 
 	gravityRegular font.Face
+	audioContext   *audio.Context
+	elements       []*element
 
-	elements      []*element
 	emptyImage    = ebiten.NewImage(3, 3)
 	emptySubImage = emptyImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image)
 	screenheight  = 240
@@ -46,6 +50,10 @@ func init() {
 	}
 
 	emptyImage.Fill(color.White)
+
+	sampleRate := 44100
+	audioContext = audio.NewContext(sampleRate)
+
 }
 
 // Game implements ebiten.Game interface.
