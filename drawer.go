@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -16,14 +15,16 @@ type animator struct {
 	transformation   *ebiten.GeoM
 	width, height    float64
 	origin           vec
+	static           bool
 }
 
-func newAnimator(container *element, sequences map[string]*sequence, defaultSequence string) *animator {
+func newAnimator(container *element, sequences map[string]*sequence, defaultSequence string, static bool) *animator {
 	return &animator{
 		container:        container,
 		sequences:        sequences,
 		currentSequence:  defaultSequence,
 		lastFrameChanged: time.Now(),
+		static:           static,
 	}
 }
 
@@ -50,7 +51,11 @@ func (an *animator) ondraw(screen *ebiten.Image) error {
 	//apply rotation
 	op.GeoM.Rotate(an.container.rotation)
 	//move to container x,y
-	op.GeoM.Translate(an.container.position.x, an.container.position.y)
+	if an.static {
+		op.GeoM.Translate(an.container.position.x, an.container.position.y)
+	} else {
+		op.GeoM.Translate(an.container.position.x-game.position.x, an.container.position.y-game.position.y)
+	}
 
 	if an.transformation != nil {
 		an.transformation.Concat(op.GeoM)
@@ -68,6 +73,7 @@ type screenDrawer struct {
 	width, height  float64
 	origin         vec
 	transformation *ebiten.GeoM
+	static         bool
 }
 
 type sequence struct {
@@ -100,7 +106,6 @@ func newScreenDrawer(container *element, imgfunc func() *ebiten.Image) *screenDr
 	height := img.Bounds().Max.Y - img.Bounds().Min.Y
 	origin := vec{-float64(width) / 2, -float64(height) / 2} //default origin center of image
 
-	log.Printf("newScreenDrawer: container:%s, width:%d, height:%d, origin: %v", container, width, height, origin)
 	return &screenDrawer{
 		container: container,
 		img:       img,
@@ -112,7 +117,6 @@ func newScreenDrawer(container *element, imgfunc func() *ebiten.Image) *screenDr
 
 func (s *screenDrawer) withOrigin(origin vec) *screenDrawer {
 	s.origin = origin
-	log.Printf("newScreenDrawer: container:%s, width:%f, height:%f, origin: %v", s.container, s.width, s.height, origin)
 	return s
 }
 
@@ -132,7 +136,11 @@ func (s *screenDrawer) ondraw(screen *ebiten.Image) error {
 	//apply rotation
 	op.GeoM.Rotate(s.container.rotation)
 	//move to container x,y
-	op.GeoM.Translate(s.container.position.x, s.container.position.y)
+	if s.static {
+		op.GeoM.Translate(s.container.position.x, s.container.position.y)
+	} else {
+		op.GeoM.Translate(s.container.position.x-game.position.x, s.container.position.y-game.position.y)
+	}
 
 	if s.transformation != nil {
 		s.transformation.Concat(op.GeoM)

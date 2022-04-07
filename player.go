@@ -12,11 +12,11 @@ import (
 const thrust = 0.1
 const friction = 0.01
 
-func newPlayer() *element {
+func newPlayer(startpos vec) *element {
 	const unit = 8
 	np := &element{
 		active:   true,
-		position: vec{100, 100},
+		position: startpos,
 		rotation: -math.Pi / 2,
 		label:    "player",
 	}
@@ -37,7 +37,7 @@ func newPlayer() *element {
 		},
 		"burn": seq,
 	}
-	an := newAnimator(np, sequences, "idle")
+	an := newAnimator(np, sequences, "idle", false)
 	np.addComponent(an)
 	thrustSound := newSound("assets/audio/thrust_loop.ogg", true)
 	np.register("burn", []func(){thrustSound.play, func() { an.currentSequence = "burn" }})

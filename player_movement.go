@@ -1,11 +1,11 @@
 package main
 
 import (
+	"log"
 	"math"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	tmath "github.com/justasitsounds/thrusto/math"
 )
 
 type keyboardMover struct {
@@ -50,12 +50,33 @@ func (km *keyboardMover) onupdate() error {
 	km.container.velocity.x *= (1 - friction)
 	km.container.velocity.y *= (1 - friction)
 
-	km.container.position.x += km.container.velocity.x
-	km.container.position.y += km.container.velocity.y
+	km.container.position.x += km.container.velocity.x //- game.position.x
+	km.container.position.y += km.container.velocity.y //- game.position.y
+
+	log.Printf("ship pos %v\n", km.container.position)
+	if km.container.position.x < float64(screenwidth)/4 {
+		game.scrollX(float64(screenwidth)/2 - km.container.position.x)
+		// game.scrollX(-float64(screenwidth) / 4)
+		// game.position.x += float64(screenwidth) / 4
+	}
+	if km.container.position.x > 3*(float64(screenwidth)/4) {
+		// game.scrollX(float64(screenwidth) / 4)
+		// game.position.x -= float64(screenwidth) / 4
+		game.scrollX(km.container.position.x - float64(screenwidth)/2)
+	}
+	if km.container.position.y < float64(screenheight)/4 {
+		game.scrollY(-float64(screenheight)/2 - km.container.position.y)
+		// game.posit-ion.y += float64(screenhight) / 4
+	}
+	if km.container.position.y > 3*(float64(screenheight)/4) {
+		game.scrollY(km.container.position.y - float64(screenheight)/2)
+		// game.positon.y -= float64(screenheight) / 4
+
+	}
 
 	//keep ship on screen - would be useful for scrolling bounds?
-	km.container.position.x = tmath.Clampf(km.container.position.x, 0, float64(screenwidth))
-	km.container.position.y = tmath.Clampf(km.container.position.y, 0, float64(screenheight))
+	// km.container.position.x = tmath.Clampf(km.container.position.x, 0, float64(screenwidth))
+	// km.container.position.y = tmath.Clampf(km.container.position.y, 0, float64(screenheight))
 
 	return nil
 }

@@ -60,7 +60,10 @@ func (bm *bulletMover) onupdate() error {
 	bm.velocity.y = math.Sin(bm.container.rotation) * bulletSpeed
 	bm.container.position.x += bm.velocity.x
 	bm.container.position.y += bm.velocity.y
-	if bm.container.position.x < 0 || bm.container.position.x > float64(screenwidth) || bm.container.position.y < 0 || bm.container.position.y > float64(screenheight) {
+	if bm.container.position.x-game.position.x < 0 ||
+		bm.container.position.x-game.position.x > float64(screenwidth) ||
+		bm.container.position.y-game.position.y < 0 ||
+		bm.container.position.y-game.position.y > float64(screenheight) {
 		bm.container.active = false
 	}
 	return nil

@@ -17,6 +17,7 @@ func newFuelBar() *element {
 		label:    "fuelbar",
 	}
 	sd := newScreenDrawer(el, fuelBarImage).withOrigin(vec{0, 0})
+	sd.static = true
 	el.addComponent(sd)
 	el.addComponent(newFuelBarMover(el, fuellevel))
 
