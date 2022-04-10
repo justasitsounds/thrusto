@@ -2,14 +2,13 @@ package main
 
 import (
 	"embed"
-	"fmt"
 	"image"
 	"image/color"
 	"log"
 
+	"github.com/fogleman/ease"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -49,7 +48,7 @@ func init() {
 		Hinting: font.HintingFull,
 	})
 	if err != nil {
-		log.Fatal("couldn't create face")
+		log.Fatal("couldn't create font face")
 	}
 
 	emptyImage.Fill(color.White)
@@ -59,72 +58,11 @@ func init() {
 
 }
 
-// Game implements ebiten.Game interface.
-type Game struct {
-	position vec
-	xsteps   int
-	xoffset  float64
-	ysteps   int
-	yoffset  float64
-}
-
-// Update proceeds the game state.
-// Update is called every tick (1/60 [s] by default).
-func (g *Game) Update() error {
-	// Write your game's logical update
-	if g.xsteps > 0 {
-		g.position.x += g.xoffset
-		g.xsteps--
-	}
-
-	if g.ysteps > 0 {
-		g.position.y += g.yoffset
-		g.ysteps--
-	}
-
-	// g.position.x += 1
-
-	for _, e := range elements {
-		e.update()
-	}
-	return nil
-}
-
-// Draw draws the game screen.
-// Draw is called every frame (typically 1/60[s] for 60Hz display).
-func (g *Game) Draw(screen *ebiten.Image) {
-	// Write your game's rendering.
-	screen.Fill(color.White)
-	for _, e := range elements {
-		if e.active {
-			e.draw(screen)
-		}
-	}
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("GamePosition: %v", g.position))
-	ebitenutil.DrawRect(screen, float64(screenwidth)/4, float64(screenheight)/4, float64(screenwidth)/2, float64(screenheight)/2, color.RGBA{0xff, 0x00, 0x00, 0x80})
-}
-
-// Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
-// If you don't have to adjust the screen size with the outside size, just return a fixed size.
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return screenwidth, screenheight
-}
-
-func (g *Game) scrollX(xoffset float64) {
-	var steps = 240
-	g.xoffset = xoffset / float64(steps)
-	g.xsteps = steps
-}
-
-func (g *Game) scrollY(yoffset float64) {
-	var steps = 240
-	g.yoffset = yoffset / float64(steps)
-	g.ysteps = steps
-}
-
 func main() {
 	game = &Game{
-		position: vec{0, 0},
+		position:     vec{0, 0},
+		scrollFrames: 60,
+		scrollFunc:   ease.Linear,
 	}
 
 	cave := newCave()

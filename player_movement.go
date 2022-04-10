@@ -13,6 +13,8 @@ type keyboardMover struct {
 	animator  *animator
 }
 
+var center = vec{x: float64(screenwidth) / 2, y: float64(screenheight) / 2}
+
 func newKeyboardMover(container *element) *keyboardMover {
 	km := &keyboardMover{
 		container: container,
@@ -53,32 +55,32 @@ func (km *keyboardMover) onupdate() error {
 	km.container.position.x += km.container.velocity.x //- game.position.x
 	km.container.position.y += km.container.velocity.y //- game.position.y
 
-	log.Printf("ship pos %v\n", km.container.position)
-	if km.container.position.x < float64(screenwidth)/4 {
-		game.scrollX(float64(screenwidth)/2 - km.container.position.x)
-		// game.scrollX(-float64(screenwidth) / 4)
-		// game.position.x += float64(screenwidth) / 4
+	screenPos := screenPosition(km.container.position, game.position)
+	log.Printf("ship pos %v | game pos %v | center pos %v | screen pos %v\n", km.container.position, game.position, center, screenPos)
+	if center.sub(screenPos).length() > float64(screenheight)/2 {
+		game.scrollTo(km.container.position.sub(center).add(game.position))
 	}
-	if km.container.position.x > 3*(float64(screenwidth)/4) {
-		// game.scrollX(float64(screenwidth) / 4)
-		// game.position.x -= float64(screenwidth) / 4
-		game.scrollX(km.container.position.x - float64(screenwidth)/2)
-	}
-	if km.container.position.y < float64(screenheight)/4 {
-		game.scrollY(-float64(screenheight)/2 - km.container.position.y)
-		// game.posit-ion.y += float64(screenhight) / 4
-	}
-	if km.container.position.y > 3*(float64(screenheight)/4) {
-		game.scrollY(km.container.position.y - float64(screenheight)/2)
-		// game.positon.y -= float64(screenheight) / 4
-
-	}
-
-	//keep ship on screen - would be useful for scrolling bounds?
-	// km.container.position.x = tmath.Clampf(km.container.position.x, 0, float64(screenwidth))
-	// km.container.position.y = tmath.Clampf(km.container.position.y, 0, float64(screenheight))
+	// if screenPos.x < float64(screenwidth)/4 {
+	// 	game.scrollTo(vec{x: game.position.x - float64(screenwidth)/3, y: game.position.y})
+	// }
+	// if screenPos.x > 3*(float64(screenwidth)/4) {
+	// 	game.scrollTo(vec{x: game.position.x + float64(screenwidth)/3, y: game.position.y})
+	// }
+	// if screenPos.y < float64(screenheight)/4 {
+	// 	game.scrollTo(vec{x: game.position.x, y: game.position.y - float64(screenheight)/3})
+	// }
+	// if screenPos.y > 3*(float64(screenheight)/4) {
+	// 	game.scrollTo(vec{x: game.position.x, y: game.position.y + float64(screenheight)/3})
+	// }
 
 	return nil
+}
+
+func screenPosition(shipPos vec, gamePos vec) vec {
+	return vec{
+		x: shipPos.x - gamePos.x,
+		y: shipPos.y - gamePos.y,
+	}
 }
 
 type keyboardShooter struct {

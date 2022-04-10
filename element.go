@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -14,6 +15,26 @@ type component interface {
 
 type vec struct {
 	x, y float64
+}
+
+func (v vec) add(other vec) vec {
+	return vec{v.x + other.x, v.y + other.y}
+}
+
+func (v vec) mul(other vec) vec {
+	return vec{v.x * other.x, v.y * other.y}
+}
+
+func (v vec) scale(scalar float64) vec {
+	return vec{v.x * scalar, v.y * scalar}
+}
+
+func (v vec) sub(other vec) vec {
+	return vec{v.x - other.x, v.y - other.y}
+}
+
+func (v vec) length() float64 {
+	return math.Sqrt(v.x*v.x + v.y*v.y)
 }
 
 type element struct {
