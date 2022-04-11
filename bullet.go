@@ -30,7 +30,7 @@ func bulletFromMagazine() (*element, bool) {
 
 func bulletImage() *ebiten.Image {
 	im := ebiten.NewImage(3, 3)
-	im.Fill(color.Black)
+	im.Fill(color.White)
 	return im
 }
 

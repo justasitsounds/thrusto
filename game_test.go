@@ -8,18 +8,16 @@ import (
 )
 
 func TestScrollEasing(t *testing.T) {
-	is := is.New(t)
+	is := is.NewRelaxed(t)
 	g := &Game{
 		position:     vec{0, 0},
-		scrollFrames: 10,
+		scrollFrames: 4,
 	}
-	g.scrollTo(vec{x: 10, y: 0})
+	g.scrollTo(vec{x: 4, y: 0}, 3.0)
 	g.scrollFunc = ease.Linear
 
-	// is.Equal(g.xoffset, 1.0)
-	is.Equal(g.scrollOffset.x, 10.0)
-	// is.Equal(g.xsteps, 10)
-	// for i := 0; i < g.scrollSteps; i++ {
+	is.Equal(g.scrollOffset.x, 4.0)
+
 	g.Update()
 	is.Equal(g.position.x, 1.0)
 	g.Update()
@@ -27,5 +25,14 @@ func TestScrollEasing(t *testing.T) {
 	g.Update()
 	g.Update()
 	is.Equal(g.position.x, 4.0)
-	// }
+
+	g.scrollTo(vec{x: 8, y: 0}, 3.0)
+
+	is.Equal(g.scrollOffset.x, 4.0)
+	g.Update()
+	is.Equal(g.position.x, 5.0)
+	g.Update()
+	g.Update()
+	g.Update()
+	is.Equal(g.position.x, 8.0)
 }

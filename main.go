@@ -61,7 +61,7 @@ func init() {
 func main() {
 	game = &Game{
 		position:     vec{0, 0},
-		scrollFrames: 60,
+		scrollFrames: 15,
 		scrollFunc:   ease.Linear,
 	}
 

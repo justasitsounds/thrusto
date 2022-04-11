@@ -52,26 +52,15 @@ func (km *keyboardMover) onupdate() error {
 	km.container.velocity.x *= (1 - friction)
 	km.container.velocity.y *= (1 - friction)
 
-	km.container.position.x += km.container.velocity.x //- game.position.x
-	km.container.position.y += km.container.velocity.y //- game.position.y
+	km.container.position.x += km.container.velocity.x
+	km.container.position.y += km.container.velocity.y
 
 	screenPos := screenPosition(km.container.position, game.position)
-	log.Printf("ship pos %v | game pos %v | center pos %v | screen pos %v\n", km.container.position, game.position, center, screenPos)
-	if center.sub(screenPos).length() > float64(screenheight)/2 {
-		game.scrollTo(km.container.position.sub(center).add(game.position))
+	log.Printf("ship %v | game %v | center %v | screen %v\n", km.container.position, game.position, center, screenPos)
+
+	if center.sub(screenPos).length() > float64(screenheight)/4 {
+		game.scrollTo(km.container.position.sub(center), km.container.velocity.length())
 	}
-	// if screenPos.x < float64(screenwidth)/4 {
-	// 	game.scrollTo(vec{x: game.position.x - float64(screenwidth)/3, y: game.position.y})
-	// }
-	// if screenPos.x > 3*(float64(screenwidth)/4) {
-	// 	game.scrollTo(vec{x: game.position.x + float64(screenwidth)/3, y: game.position.y})
-	// }
-	// if screenPos.y < float64(screenheight)/4 {
-	// 	game.scrollTo(vec{x: game.position.x, y: game.position.y - float64(screenheight)/3})
-	// }
-	// if screenPos.y > 3*(float64(screenheight)/4) {
-	// 	game.scrollTo(vec{x: game.position.x, y: game.position.y + float64(screenheight)/3})
-	// }
 
 	return nil
 }

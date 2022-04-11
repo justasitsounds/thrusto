@@ -37,6 +37,10 @@ func (v vec) length() float64 {
 	return math.Sqrt(v.x*v.x + v.y*v.y)
 }
 
+func (v vec) String() string {
+	return fmt.Sprintf("{ x : %.2f, y : %.2f }", v.x, v.y)
+}
+
 type element struct {
 	position      vec
 	velocity      vec

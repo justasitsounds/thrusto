@@ -53,6 +53,12 @@ func TestRamp(t *testing.T) {
 			rampwant: -0.3,
 		},
 		{
+			s:        0,
+			a:        -10,
+			b:        10,
+			rampwant: 0.5,
+		},
+		{
 			s:        -3,
 			a:        -10,
 			b:        10,
