@@ -7,7 +7,6 @@ import (
 
 	"github.com/fogleman/ease"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
 	jmath "github.com/justasitsounds/thrusto/math"
 )
@@ -26,15 +25,12 @@ type Game struct {
 // Update proceeds the game state.
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
-	if g.scrolling {
-		inc := g.scrollOffset.scale(g.scrollFunc(float64(g.scrollSteps) / float64(g.scrollFrames)))
+	if g.scrollSteps < g.scrollFrames { // we scrolling
+		inc := g.scrollOffset.scale(g.scrollFunc(float64(g.scrollSteps) / float64(g.scrollFrames))) // divide distance by number of frames to animate over - using easing function to shape
 		g.position = g.scrollFrom.add(inc)
 		g.scrollSteps++
 	}
-	if g.scrollSteps > g.scrollFrames {
-		g.scrolling = false
-		g.scrollSteps = 1
-	}
+
 	for _, e := range elements {
 		e.update()
 	}
@@ -50,8 +46,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			e.draw(screen)
 		}
 	}
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("ship position: %v", g.position))
-	// ebitenutil.DrawRect(screen, float64(screenwidth)/4, float64(screenheight)/4, float64(screenwidth)/2, float64(screenheight)/2, color.RGBA{0xff, 0x00, 0x00, 0x33})
+	// ebitenutil.DebugPrint(screen, fmt.Sprintf("ship position: %v", g.position))
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
@@ -60,15 +55,10 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenwidth, screenheight
 }
 
-func (g *Game) scrollTo(target vec, steps float64) {
-	// if !g.scrolling {
-	// fmt.Println("scrolling To", target)
-	g.scrollFrames = jmath.Clamp(30-int(math.Pow(steps, 2)), 0, 30) + 1
-	fmt.Printf("steps:%v | scrollFrames:%v\n", steps, g.scrollFrames)
+func (g *Game) scrollTo(target vec, speed float64) { // speed - not velocity - how technically correct is this?
+	g.scrollFrames = jmath.Clamp(30-int(math.Pow(speed, 2)), 0, 30) + 1 // longest animation is 30 frames, shortest is 1 frame - the faster the speed, the faster the animation
+	fmt.Printf("steps:%v | scrollFrames:%v\n", speed, g.scrollFrames)
 	g.scrollFrom = g.position
 	g.scrollOffset = target.sub(g.position)
 	g.scrollSteps = 1
-	// fmt.Println("scrollOffset", g.scrollOffset)64
-	g.scrolling = true
-	// }
 }

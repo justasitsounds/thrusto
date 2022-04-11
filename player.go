@@ -39,11 +39,17 @@ func newPlayer(startpos vec) *element {
 	}
 	an := newAnimator(np, sequences, "idle", false)
 	np.addComponent(an)
-	thrustSound := newSound("assets/audio/thrust_loop.ogg", true)
-	np.register("burn", []func(){thrustSound.play, func() { an.currentSequence = "burn" }})
-	np.register("idle", []func(){thrustSound.stop, func() { an.currentSequence = "idle" }})
+	np.on("burn", func() { an.currentSequence = "burn" })
+	np.on("idle", func() { an.currentSequence = "idle" })
+
 	np.addComponent(newKeyboardMover(np))
+
+	thrustSound := newSound("assets/audio/thrust_loop.ogg", true)
+	np.on("burn", thrustSound.play)
+	np.on("idle", thrustSound.stop)
+
 	np.addComponent(newKeyboardShooter(np, time.Millisecond*250))
+
 	return np
 }
 

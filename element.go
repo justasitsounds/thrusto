@@ -66,13 +66,11 @@ func (elem *element) raiseEvent(event string) {
 	}
 }
 
-func (elem *element) register(event string, handlers []func()) {
+func (elem *element) on(event string, handler func()) {
 	if elem.eventHandlers == nil {
 		elem.eventHandlers = make(map[string][]func())
 	}
-	for _, handler := range handlers {
-		elem.eventHandlers[event] = append(elem.eventHandlers[event], handler)
-	}
+	elem.eventHandlers[event] = append(elem.eventHandlers[event], handler)
 }
 
 func (elem *element) String() string {

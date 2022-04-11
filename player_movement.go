@@ -29,6 +29,9 @@ func (km *keyboardMover) ondraw(screen *ebiten.Image) error {
 }
 
 func (km *keyboardMover) onupdate() error {
+
+	km.container.velocity.y += gravity
+
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 		km.container.rotation -= 0.1
 	}
@@ -47,7 +50,6 @@ func (km *keyboardMover) onupdate() error {
 	} else {
 		km.container.raiseEvent("idle")
 	}
-	km.container.velocity.y += gravity
 
 	km.container.velocity.x *= (1 - friction)
 	km.container.velocity.y *= (1 - friction)
