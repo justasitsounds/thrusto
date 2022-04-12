@@ -51,27 +51,18 @@ func (km *keyboardMover) onupdate() error {
 		km.container.raiseEvent("idle")
 	}
 
-	km.container.velocity.x *= (1 - friction)
-	km.container.velocity.y *= (1 - friction)
+	km.container.velocity = km.container.velocity.scale(1 - friction)
 
-	km.container.position.x += km.container.velocity.x
-	km.container.position.y += km.container.velocity.y
+	km.container.position = km.container.position.add(km.container.velocity)
 
-	screenPos := screenPosition(km.container.position, game.position)
+	screenPos := game.screenPosition(km.container.position)
 	log.Printf("ship %v | game %v | center %v | screen %v\n", km.container.position, game.position, center, screenPos)
 
-	if center.sub(screenPos).length() > float64(screenheight)/4 {
+	if center.sub(screenPos).length() > float64(screenheight)/4 { // if the ship is too far from the center of the screen
 		game.scrollTo(km.container.position.sub(center), km.container.velocity.length())
 	}
 
 	return nil
-}
-
-func screenPosition(shipPos vec, gamePos vec) vec {
-	return vec{
-		x: shipPos.x - gamePos.x,
-		y: shipPos.y - gamePos.y,
-	}
 }
 
 type keyboardShooter struct {
@@ -87,17 +78,16 @@ func (ks *keyboardShooter) ondraw(screen *ebiten.Image) error {
 func (ks *keyboardShooter) onupdate() error {
 	if ebiten.IsKeyPressed(ebiten.KeySpace) {
 		if time.Since(ks.lastShot) > ks.cooldown {
-			ks.shoot(ks.container.position.x, ks.container.position.y, ks.container.rotation)
+			ks.shoot(ks.container.position, ks.container.rotation)
 			ks.lastShot = time.Now()
 		}
 	}
 	return nil
 }
 
-func (ks *keyboardShooter) shoot(x, y, rotation float64) {
+func (ks *keyboardShooter) shoot(shipPos vec, rotation float64) {
 	if b, ok := bulletFromMagazine(); ok {
-		b.position.x = x
-		b.position.y = y
+		b.position = shipPos
 		b.rotation = rotation
 		b.active = true
 	}

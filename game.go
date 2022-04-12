@@ -62,3 +62,7 @@ func (g *Game) scrollTo(target vec, speed float64) { // speed - not velocity - h
 	g.scrollOffset = target.sub(g.position)
 	g.scrollSteps = 1
 }
+
+func (g *Game) screenPosition(elementPosition vec) vec {
+	return elementPosition.sub(g.position)
+}
