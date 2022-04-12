@@ -90,6 +90,7 @@ func (ks *keyboardShooter) shoot(shipPos vec, rotation float64) {
 		b.position = shipPos
 		b.rotation = rotation
 		b.active = true
+		ks.container.raiseEvent("shoot")
 	}
 }
 

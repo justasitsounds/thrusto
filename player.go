@@ -14,7 +14,7 @@ const friction = 0.01
 
 func newPlayer(startpos vec) *element {
 	const unit = 8
-	np := &element{
+	player := &element{
 		active:   true,
 		position: startpos,
 		rotation: -math.Pi / 2,
@@ -37,20 +37,26 @@ func newPlayer(startpos vec) *element {
 		},
 		"burn": seq,
 	}
-	an := newAnimator(np, sequences, "idle", false)
-	np.addComponent(an)
-	np.on("burn", func() { an.currentSequence = "burn" })
-	np.on("idle", func() { an.currentSequence = "idle" })
+	an := newAnimator(player, sequences, "idle", false)
+	player.addComponent(an)
+	player.on("burn", func() { an.currentSequence = "burn" })
+	player.on("idle", func() { an.currentSequence = "idle" })
 
-	np.addComponent(newKeyboardMover(np))
+	player.addComponent(newKeyboardMover(player))
 
 	thrustSound := newSound("assets/audio/thrust_loop.ogg", true)
-	np.on("burn", thrustSound.play)
-	np.on("idle", thrustSound.stop)
+	player.on("burn", thrustSound.play)
+	player.on("idle", thrustSound.stop)
 
-	np.addComponent(newKeyboardShooter(np, time.Millisecond*250))
+	shotsound := newSound("assets/audio/shot.ogg", false)
+	player.on("shoot", func() {
+		shotsound.player.Rewind()
+		shotsound.play()
+	})
 
-	return np
+	player.addComponent(newKeyboardShooter(player, time.Millisecond*250))
+
+	return player
 }
 
 /*
