@@ -55,6 +55,7 @@ func newBulletMover(container *element) *bulletMover {
 		velocity:  vec{0, 0},
 	}
 }
+
 func (bm *bulletMover) onupdate() error {
 	bm.velocity.x = math.Cos(bm.container.rotation) * bulletSpeed
 	bm.velocity.y = math.Sin(bm.container.rotation) * bulletSpeed
@@ -62,9 +63,7 @@ func (bm *bulletMover) onupdate() error {
 
 	screenPos := game.screenPosition(bm.container.position)
 
-	if center.sub(screenPos).length() > float64(screenwidth) { // if the bullet is too far fom the center of the screen make it inactive
-		bm.container.active = false
-	}
+	bm.container.active = center.sub(screenPos).length() < float64(screenwidth) // if the bullet is too far fom the center of the screen make it inactive
 
 	return nil
 }

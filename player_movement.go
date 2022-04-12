@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"math"
 	"time"
 
@@ -56,7 +55,7 @@ func (km *keyboardMover) onupdate() error {
 	km.container.position = km.container.position.add(km.container.velocity)
 
 	screenPos := game.screenPosition(km.container.position)
-	log.Printf("ship %v | game %v | center %v | screen %v\n", km.container.position, game.position, center, screenPos)
+	// log.Printf("ship %v | game %v | center %v | screen %v\n", km.container.position, game.position, center, screenPos)
 
 	if center.sub(screenPos).length() > float64(screenheight)/4 { // if the ship is too far from the center of the screen
 		game.scrollTo(km.container.position.sub(center), km.container.velocity.length())
