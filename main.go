@@ -9,6 +9,7 @@ import (
 	"github.com/fogleman/ease"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/solarlune/resolv"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -58,6 +59,8 @@ func init() {
 
 }
 
+var space *resolv.Space
+
 func main() {
 	game = &Game{
 		position:     vec{0, 0},
@@ -69,10 +72,12 @@ func main() {
 
 	np := newPlayer(vec{float64(screenwidth) / 2, float64(screenheight) / 2})
 
+	elements = append(elements, initMagazine(4)...)
 	elements = append(elements, cave)
 	elements = append(elements, np)
-	elements = append(elements, initMagazine(4)...)
 	elements = append(elements, newFuelBar())
+
+	game.space = resolv.NewSpace(cave.width, cave.height, np.width, np.height)
 
 	// Specify the window size as you like. Here, a doubled size is specified.
 	ebiten.SetWindowSize(screenwidth*screenScale, screenheight*screenScale)

@@ -48,7 +48,10 @@ type element struct {
 	active        bool
 	label         string
 	components    []component
+	collisions    []*collision
 	eventHandlers map[string][]func()
+	width         int
+	height        int
 }
 
 func (elem *element) draw(screen *ebiten.Image) error {

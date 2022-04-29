@@ -5,6 +5,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"github.com/solarlune/resolv"
 )
 
 /*
@@ -68,7 +69,33 @@ func newCave() *element {
 		position: vec{float64(screenwidth) / 2, float64(screenheight) / 2},
 		rotation: -math.Pi / 2,
 		label:    "cave",
+		width:    cavImg.Bounds().Dx(),
+		height:   cavImg.Bounds().Dy(),
 	}
 	cave.addComponent(newScreenDrawer(cave, func() *ebiten.Image { return cavImg }))
+
+	caveObj := resolv.NewObject(cave.position.x, cave.position.y, float64(cave.width), float64(cave.height), cave.label)
+	caveObj.SetShape(resolv.NewConvexPolygon(
+		0, 0,
+		100*5, 0,
+		100*5, 5*40,
+		80*5, 40*5,
+		70*5, 12*5,
+		40*5, 12*5,
+		20*5, 50*5,
+		40*5, 88*5,
+		70*5, 88*5,
+		80*5, 60*5,
+		100*5, 60*5,
+		100*5, 100*5,
+		0, 100*5,
+	))
+	caveCollision := &collision{
+		obj:       caveObj,
+		container: cave,
+	}
+
+	cave.addComponent(caveCollision)
+	cave.collisions = append(cave.collisions, caveCollision)
 	return cave
 }

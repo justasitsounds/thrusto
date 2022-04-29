@@ -1,12 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
+	"log"
 	"math"
 
 	"github.com/fogleman/ease"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/solarlune/resolv"
 
 	jmath "github.com/justasitsounds/thrusto/math"
 )
@@ -20,6 +21,7 @@ type Game struct {
 	scrollFunc   ease.Function
 	scrollSteps  int
 	scrolling    bool
+	space        *resolv.Space
 }
 
 // Update proceeds the game state.
@@ -32,7 +34,26 @@ func (g *Game) Update() error {
 	}
 
 	for _, e := range elements {
-		e.update()
+		if e.active {
+			e.update()
+		}
+	}
+	checkCollisions()
+	return nil
+}
+
+func checkCollisions() error {
+	for i := 0; i < len(elements)-1; i++ {
+		for j := i + 1; j < len(elements); j++ {
+			for _, c1 := range elements[i].collisions {
+				for _, c2 := range elements[j].collisions {
+					if intersection := c1.obj.Shape.Intersection(c1.container.velocity.x, c1.container.velocity.y, c2.obj.Shape); intersection != nil {
+						log.Println("Collision!")
+						log.Println(intersection.Center)
+					}
+				}
+			}
+		}
 	}
 	return nil
 }
@@ -56,8 +77,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *Game) scrollTo(target vec, speed float64) { // speed - not velocity - how technically correct is this?
-	g.scrollFrames = jmath.Clamp(30-int(math.Pow(speed, 2)), 0, 30) + 1 // longest animation is 30 frames, shortest is 1 frame - the faster the speed, the faster the animation
-	fmt.Printf("steps:%v | scrollFrames:%v\n", speed, g.scrollFrames)
+	/* longest animation is 30 frames, shortest is 1 frame
+	the faster the speed, the faster the animation */
+	g.scrollFrames = jmath.Clamp(30-int(math.Pow(speed, 2)), 0, 30) + 1
 	g.scrollFrom = g.position
 	g.scrollOffset = target.sub(g.position)
 	g.scrollSteps = 1

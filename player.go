@@ -7,6 +7,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"github.com/solarlune/resolv"
 )
 
 const thrust = 0.1
@@ -30,15 +31,20 @@ func newPlayer(startpos vec) *element {
 		loop:       true,
 		sampleRate: 30,
 	}
+	idleImage := shipImage(unit)
 	sequences := map[string]*sequence{
 		"idle": {
-			images: []*ebiten.Image{shipImage(unit)},
+			images: []*ebiten.Image{idleImage},
 			loop:   false,
 		},
 		"burn": seq,
 	}
 	an := newAnimator(player, sequences, "idle", false)
 	player.addComponent(an)
+
+	player.width = idleImage.Bounds().Dx()
+	player.height = idleImage.Bounds().Dy()
+
 	player.on("burn", func() { an.currentSequence = "burn" })
 	player.on("idle", func() { an.currentSequence = "idle" })
 
@@ -55,6 +61,17 @@ func newPlayer(startpos vec) *element {
 	})
 
 	player.addComponent(newKeyboardShooter(player, time.Millisecond*250))
+
+	shipObj := resolv.NewObject(player.position.x, player.position.y, float64(player.width), float64(player.height), player.label)
+	shipObj.SetShape(resolv.NewRectangle(0, 0, float64(player.width), float64(player.height)))
+	shipCollision := &collision{
+		obj:       shipObj,
+		container: player,
+	}
+
+	player.addComponent(shipCollision)
+
+	player.collisions = append(player.collisions, shipCollision)
 
 	return player
 }
