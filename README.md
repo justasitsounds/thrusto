@@ -25,4 +25,6 @@ A simple 'thrust' clone, built with Ebiten
 
 Thrust sound effect: https://freesound.org/people/LimitSnap_Creations/sounds/318688/
 
+explosion sound effect: generated with https://sfbgames.itch.io/chiptone
+
 Gravity Font: https://jotson.itch.io/gravity-pixel-font
