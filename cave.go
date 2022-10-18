@@ -1,8 +1,6 @@
 package main
 
 import (
-	"math"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -62,11 +60,21 @@ func caveImage(unit float32) *ebiten.Image {
 }
 
 func newCave() *element {
-	cavImg := caveImage(5)
+	// cavImg := caveImage(5)
+	tileMap := []int{
+		40, 40, 40, 40, 0, 0, 40, 40, 40, 40,
+		40, 40, 40, 80, 0, 0, 120, 40, 40, 40,
+		40, 40, 80, 0, 0, 0, 0, 120, 40, 40,
+		40, 40, 0, 0, 0, 0, 0, 0, 40, 40,
+		40, 40, 0, 0, 0, 0, 0, 0, 40, 40,
+		40, 40, 160, 0, 0, 0, 0, 200, 40, 40,
+		40, 40, 40, 160, 0, 0, 200, 40, 40, 40,
+		40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+	}
+	cavImg := newTileImage(tileMap, 10)
 	cave := &element{
 		active:   true,
 		position: vec{float64(screenwidth) / 2, float64(screenheight) / 2},
-		rotation: -math.Pi / 2,
 		label:    "cave",
 	}
 	cave.addComponent(newScreenDrawer(cave, func() *ebiten.Image { return cavImg }))

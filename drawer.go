@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"image"
+	_ "image/png"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type animator struct {
@@ -153,4 +157,36 @@ func (s *screenDrawer) ondraw(screen *ebiten.Image) error {
 
 func (s *screenDrawer) onupdate() error {
 	return nil
+}
+
+func newTileImage(mapDef []int, rowlength int) *ebiten.Image {
+	tileSrc, _ := imageFS.Open("assets/images/cave_tiles.png")
+	defer tileSrc.Close()
+
+	e, _, err := ebitenutil.NewImageFromReader(tileSrc)
+	if err != nil {
+		panic(fmt.Sprintf("couldn't load tile src:%v", err))
+	}
+
+	tileSize := 40
+	rowCount := len(mapDef) / rowlength
+
+	width := tileSize * rowlength
+	height := tileSize * rowCount
+
+	img := ebiten.NewImage(width, height)
+	for i, t := range mapDef {
+		op := &ebiten.DrawImageOptions{}
+		tilex := float64((i % rowlength) * tileSize)
+		tiley := float64((i / rowlength) * tileSize)
+		op.GeoM.Translate(tilex, tiley)
+		fmt.Printf("tilex:%v, tiley:%v\n", tilex, tiley)
+
+		sx := t
+		sy := 0
+		fmt.Printf("subImage(x:%v, y:%v) placing at :%v,%v\n", sx, sy, tilex, tiley)
+		fmt.Printf("RECT(%v,%v,%v,%v)\n", sx, sy, sx+tileSize, sy+tileSize)
+		img.DrawImage(e.SubImage(image.Rect(sx, sy, sx+tileSize, sy+tileSize)).(*ebiten.Image), op)
+	}
+	return img
 }

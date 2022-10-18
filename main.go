@@ -13,13 +13,15 @@ import (
 	"golang.org/x/image/font/opentype"
 )
 
-const gravity = 0.05
+const gravity = 0.0
 
 var (
 	//go:embed assets/fonts
 	fonts embed.FS
 	//go:embed assets/audio
 	audioFS embed.FS
+	//go:embed assets/images
+	imageFS embed.FS
 
 	gravityRegular font.Face
 	audioContext   *audio.Context

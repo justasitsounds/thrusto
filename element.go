@@ -62,7 +62,7 @@ func (elem *element) draw(screen *ebiten.Image) error {
 
 func (elem *element) raiseEvent(event string) {
 	for _, handler := range elem.eventHandlers[event] {
-		handler()
+		go handler() //event handlers are non-blocking???
 	}
 }
 
